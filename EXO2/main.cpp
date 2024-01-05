@@ -109,10 +109,10 @@ int test2E()
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-  //return test2A();
-  //return test2B();
-  //return test2C();
-  //return test2D();
-  //return test2E();
+  //return test2A(); //3 fenetre avec 3 class de fenetres
+  //return test2B(); //sans NC
+  //return test2C(); //voulez vous fermer la fenetre ?
+  //return test2D(); //timer
+  //return test2E(); //glue window
 }
 

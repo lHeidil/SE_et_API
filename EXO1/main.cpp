@@ -72,14 +72,14 @@ int test1F_v2()
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-  //return test1BC_v0();
-  //return test1BC_v1();
-  //return test1BC_v2();
-  //return test1BC_v3();
-  //return test1BC_v4();
-  //return test1BC_v5();
-  //return test1BC_v6();
-  //return test1D();
-  //return test1F_v1();
-  //return test1F_v2();
+  //return test1BC_v0(); //default
+  //return test1BC_v1(); //nom
+  //return test1BC_v2(); //position
+  //return test1BC_v3(); //scroll
+  //return test1BC_v4(); //topmost
+  //return test1BC_v5(); //couleur du fond
+  //return test1BC_v6(); //menu
+  //return test1D(); //boutton
+  //return test1F_v1(); //all main
+  //return test1F_v2(); //3rd is main
 }

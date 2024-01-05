@@ -25,7 +25,7 @@ public :
 };
 _declspec(selectany) const RECT CMenuWind::rpos={0, 0, 500, 500};
 
-class CDessineWind: public CWind //charge persistant
+class CDessineWind: public CWind //charge non-persistant
 {
   COLORREF pen_color;
   int pen_width;
@@ -605,7 +605,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	//return test3A();
 	//return test3B();
 	//return test3C();
-	//return test3D();
+	return test3D();
 	//return test3E();
 	//return test3F();
 

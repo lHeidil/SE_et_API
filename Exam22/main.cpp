@@ -6,6 +6,53 @@
 
 class ComplexWind: public CWind{
 	HMENU menu_hnd;
+	HBRUSH hb;
+	POINT lastPoint;
+	virtual LRESULT WmLButtonDown(HWND hWnd, WPARAM wP, LPARAM lP)//important to start drawing from these coordinates when you stop and restart not from the last point
+  {
+    int x = GET_X_LPARAM(lP);
+    int y = GET_Y_LPARAM(lP);	
+	lastPoint.x = x;
+    lastPoint.y = y;
+	return 0;
+  }
+  virtual LRESULT WmLButtonMove(HWND hWnd, WPARAM wP, LPARAM lP)
+  {
+	  if(wP==MK_LBUTTON)
+	  {
+		int x = GET_X_LPARAM(lP);
+		int y = GET_Y_LPARAM(lP);
+
+		HDC dc=::GetDC(hWnd);
+		HBRUSH hb= hb= ::CreateSolidBrush(0xFFFF00);
+		HGDIOBJ hb_old=::SelectObject(dc,hb);
+
+		::Ellipse(dc,lastPoint.x,lastPoint.y,x,y);
+
+		::SelectObject(dc, hb_old);
+		::DeleteObject(hb);
+		::ReleaseDC(hWnd,dc); //lzm arg3ha zy mkant!!
+
+		lastPoint.x = x;
+		lastPoint.y = y;
+		
+	  }
+	  return 0;
+  }
+	void SetBack(COLORREF color)
+	{
+		//solution tanya ashl btlwn el bkground
+		//SetClassLongPtr(m_hWnd, GCLP_HBRBACKGROUND, (LONG_PTR)(LONG_PTR)CreateSolidBrush(color)); 
+		 
+		//solution eli 3yzha
+		HDC dc= ::GetDC(m_hWnd);
+		 hb= ::CreateSolidBrush(color);
+		HGDIOBJ hb_old=::SelectObject(dc,hb);
+		
+		InvalidateRect(m_hWnd, NULL, TRUE);
+		
+        ::SelectObject(dc,hb_old); //lzm arg3ha zy mkant
+	}
 	LRESULT WmCommand(HWND hWnd, WPARAM wP, LPARAM lP) 
 	{
 		switch(LOWORD(wP))
@@ -18,13 +65,13 @@ class ComplexWind: public CWind{
 		case ID_APPLICATION_QUITTERDANS10S:
 			::SetTimer(m_hWnd,2,10000,(TIMERPROC) NULL);break; //timerID=2, interruptTime=10000us
 		case ID_FEN40001:
-			break;
+			SetBack(0xFFFFFF);break;
 		case ID_FEN40002:
-			break;
+			SetBack(0x0000FF);break;
 		case ID_FEN40003:
-			break;
+			SetBack(0x00FF00);break;
 		case ID_FEN40004:
-			break;
+			SetBack(0xFF0000);break;
 		case ID_FEN40005:
 			menu_hnd= ::GetMenu(m_hWnd);
 			::SetMenu(m_hWnd,0);
@@ -40,6 +87,16 @@ class ComplexWind: public CWind{
 		case VK_ESCAPE: //escape key
 			//CWind::SetStyle(CWind::DEF_STYLE); //msh mfrod a3ml kda
 			::SetMenu(m_hWnd,menu_hnd);break;
+		case VK_DELETE :
+			::InvalidateRect(hWnd, NULL, TRUE);break; //redraw since it's not persistance so it will erase
+		case 'W':
+			SetBack(0xFFFFFF);break;
+		case 'R':
+			SetBack(0x0000FF);break;
+		case 'V':
+			SetBack(0x00FF00);break;
+		case 'B':
+			SetBack(0xFF0000);break;
 		default: return -1;
 		}
 		return 0;
@@ -52,13 +109,20 @@ class ComplexWind: public CWind{
 	LRESULT WmPaint(HWND hWnd, WPARAM wP, LPARAM lP)
 	{ 
     RECT r; ::GetClientRect(hWnd, &r);  //GetClientRect instead of GetWindowRect for client area dimensions
-    PAINTSTRUCT ps;//pour tout les app qui dessine
+	PAINTSTRUCT ps;//pour tout les app qui dessine
     HDC dc=::BeginPaint(hWnd,&ps);
+
+	//background filling
+	::FillRect(dc,&r,hb);
+	::DeleteObject(hb); //destroy el obj lma b3mlha fo2 mbtshtghlsh
+	//::SetBkColor(dc,::GetDCBrushColor(dc)); di msh btshtghl lma b7otha t7t btlwn l text lma tb2a opaque
+
     //tout passe entre ses 2 lignes
     HBRUSH hb= ::CreateSolidBrush(0x0000FF);
     HGDIOBJ hb_old=::SelectObject(dc,hb);
     //hnbd2 nrsm hna
-    
+    //::SetBkColor(dc,color);
+
 	::SetBkMode(dc,TRANSPARENT);
 	TCHAR buf[10];
     wsprintf(buf,_T("Heidi GAD"));

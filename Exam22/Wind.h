@@ -3,7 +3,7 @@
 #include <windows.h>
 #include <tchar.h>
 
-#define USE_CONSOLE
+//#define USE_CONSOLE
 #ifdef USE_CONSOLE
 #include <stdio.h>
 // this class allow you to use printf in any Windows GUI application

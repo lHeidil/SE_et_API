@@ -110,7 +110,9 @@ public:
 	CodeWind(LPCTSTR _code=_T("2015")):
 		CWind(0x00FF00,_T(""),&rpos,WS_VISIBLE | WS_POPUPWINDOW ,0, CClsWind::DEF_STYLE),time(0),timeToClose(20),i(0)
 		{
-			_stprintf_s(code, _T("%s"), _code); //Assign the code parameter to code attribut by value
+			if ((int)_tcslen(_code) == 4 ) //protection that assignes the default value if the parameter != 4 chars
+				_stprintf_s(code, _T("%s"), _code); //Assign the code parameter to code attribut by value
+			else _stprintf_s(code,_T("2015"));
 			//for (int j=0;j<5;j++)
 				//	printf("Initial Code: %c\n",code[j]);
 			_stprintf_s(buf,_T("Taper le code"));
@@ -177,7 +179,7 @@ _declspec(selectany) const COLORREF CodeWind::bkgndColors[3]={0x00FFFF,0x0000FF,
 
 int test1() // points A-E
 {
-  CodeWind w1;
+  CodeWind w1(_T("123456789"));
   return CWind::MsgLoop();
 }
 

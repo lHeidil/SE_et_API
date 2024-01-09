@@ -3,7 +3,7 @@
 #include <string>
 //#include "Resource.h"
 
-/****************************** classe ComplexWind *******************************/ 
+/****************************** classe CodeWind *******************************/ 
 
 class CodeWind: public CWind{
 	TCHAR code[5];
@@ -175,11 +175,57 @@ public:
 _declspec(selectany) const RECT CodeWind::rpos={0,0,240,200};
 _declspec(selectany) const COLORREF CodeWind::bkgndColors[3]={0x00FFFF,0x0000FF,0x00FF00};
 
+/****************************** classe FormWind *******************************/ 
+class CWinNoBorder: public CWind
+{
+protected:
+  
+public:
+  CWinNoBorder(COLORREF Color, const RECT* pR=0):CWind(Color,_T(""),pR,WS_VISIBLE | WS_POPUP){}
+};
+
+class FormWind: public CWind
+{
+	virtual LRESULT WmLButtonDown(HWND hWnd, WPARAM wP, LPARAM lP)
+	{ return ::SendMessage(hWnd,WM_NCLBUTTONDOWN,HTCAPTION,0);  }
+	virtual LRESULT WmRButtonDown(HWND hWnd, WPARAM wP, LPARAM lP)
+	{ return ::SendMessage(hWnd,WM_CLOSE,0,0);    }
+public:
+	void SetRound(int x,int y,int w,int h)
+	{
+		HRGN hRgn = ::CreateEllipticRgn(x,y,w,h);
+		::SetWindowRgn(m_hWnd,hRgn,true);
+	}
+	void SetTriangle(CONST POINT *p)
+	{
+		HRGN hRgn = ::CreatePolygonRgn(p,3,WINDING);
+		::SetWindowRgn(m_hWnd,hRgn,true);
+	}
+	void SetRoundRect(int x,int y,int w,int h,int h_ellipse,int w_ellipse)
+	{
+		HRGN hRgn = ::CreateRoundRectRgn(x,y,w,h,h_ellipse,w_ellipse);
+		::SetWindowRgn(m_hWnd,hRgn,true);
+	}
+
+	FormWind(COLORREF Color, const RECT* pR=0):CWind(Color,_T(""),pR,WS_VISIBLE | WS_POPUP | WS_EX_TOPMOST){}
+};
 /******************************** tests unitaires ***************************/
 
-int test1() // points A-E
+int test1() // Exo1
 {
   CodeWind w1(_T("123456789"));
+  return CWind::MsgLoop();
+}
+int test2() // Exo2
+{
+  RECT r1={0,0,200,200}, r2={250,0,200,200}, r3={500,0,200,200};
+  FormWind w1(0xA0000FF,&r1);
+  FormWind w2(0x00FF00,&r2);
+  FormWind w3(0xA00FFFF,&r3);
+  w1.SetRound(0,0,200,200);
+  CONST POINT p[3]= {{0, 200},{200, 200},{100, 0}};
+  w2.SetTriangle(p);
+  w3.SetRoundRect(0,0,200,200,50,50);
   return CWind::MsgLoop();
 }
 

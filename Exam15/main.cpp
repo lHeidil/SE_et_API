@@ -6,9 +6,11 @@
 /****************************** classe ComplexWind *******************************/ 
 
 class CodeWind: public CWind{
-	LPCTSTR code;
+	TCHAR code[5];
+	int i;
 	static const COLORREF bkgndColors[3];
 	static const RECT rpos;
+	TCHAR buf[14];
 	CWind *pb11, *pb12, *pb13,*pb21, *pb22, *pb23,*pb31, *pb32, *pb33,*pb41, *pb42, *pb43, *ps;
 	int time,timeToClose;
 	LRESULT WmTimer(HWND hWnd, WPARAM wP, LPARAM lP){
@@ -34,6 +36,48 @@ class CodeWind: public CWind{
 		default: return -1;
 	  }
   }
+  virtual LRESULT WmCommand(HWND hWnd, WPARAM wP, LPARAM lP) 
+  {	
+	if(LOWORD(wP) == 10 || LOWORD(wP) == 12) 
+	  {
+		i=0;_stprintf_s(buf,_T("Taper le code"));
+		::InvalidateRect(m_hWnd,NULL,TRUE);
+	  }
+	else if (code[i] == (TCHAR)(LOWORD(wP) + '0') || (LOWORD(wP)== 11 && code[i] == '0'))
+		{
+			#ifdef USE_CONSOLE
+				printf("code as char: %c\n",code[i]);
+				printf("code as int ASCII-48: %d, ID: %d\n",int(code[i]-48),LOWORD(wP));
+				//printf("code as char: %c, ID as char: %c\n",code[i],(TCHAR)(LOWORD(wP) + '0'));
+			#endif
+
+			buf[i] = '*';
+			i++;
+			buf[i] = '\0'; //adding null terminator to be able to use _tcslen(buf)
+			if ((int)_tcslen(buf) == 4) _stprintf_s(buf,_T("GAGNE !!!"));
+			#ifdef USE_CONSOLE
+				printf("Buffer: %s\n", buf);
+				printf("%d\n",(int)_tcslen(buf));
+			#endif
+			
+			::InvalidateRect(m_hWnd,NULL,TRUE);
+			return 0;
+		}
+	else {
+		if ((int)_tcslen(buf) != 9){
+		_stprintf_s(buf,_T("Erreur !!!")); i=0;
+		::InvalidateRect(m_hWnd,NULL,TRUE);
+		return 0;
+		}}
+		
+		//Another solution but requires to write the 12 cases
+		/*switch (LOWORD(wP)){
+		case 1:{if (code[i] == '1'){buf[i] = '*';i++;}break;}
+		default: return -1;
+		}return 0;*/
+
+		return -1;
+  }
   LRESULT WmPaint(HWND hWnd, WPARAM wP, LPARAM lP)
 	{ 
     RECT r; ::GetClientRect(hWnd, &r);  //GetClientRect instead of GetWindowRect for client area dimensions
@@ -46,13 +90,7 @@ class CodeWind: public CWind{
     HGDIOBJ hb_old=::SelectObject(dc,hb);
     //hnbd2 nrsm hna
 
-	TCHAR buf[14];
-
-	_stprintf_s(buf,_T("Taper le code"));
-
-	#ifdef USE_CONSOLE
-	printf("%d %c %c \n",(int)_tcslen(buf),buf[2],*code); //test:printing length, a char from the buffer, a char from LPCSTR
-	#endif //USE_CONSOLE
+	//_stprintf_s(buf,_T("Taper le code"));
 
 	::SetBkMode(dc,TRANSPARENT);
 	::SetTextColor(dc,RGB(0, 0, 0));
@@ -70,8 +108,12 @@ class CodeWind: public CWind{
   }
 public:
 	CodeWind(LPCTSTR _code=_T("2015")):
-		CWind(0x00FF00,_T(""),&rpos,WS_VISIBLE | WS_POPUPWINDOW ,0, CClsWind::DEF_STYLE),code(_code),time(0),timeToClose(6)
+		CWind(0x00FF00,_T(""),&rpos,WS_VISIBLE | WS_POPUPWINDOW ,0, CClsWind::DEF_STYLE),time(0),timeToClose(20),i(0)
 		{
+			_stprintf_s(code, _T("%s"), _code); //Assign the code parameter to code attribut by value
+			//for (int j=0;j<5;j++)
+				//	printf("Initial Code: %c\n",code[j]);
+			_stprintf_s(buf,_T("Taper le code"));
 			::SetTimer(m_hWnd,1,2000,::TIMERPROC()); //timerID=1, interruptTime=2000us
 			RECT r={0,0,80,40};
 			r.top+=40;

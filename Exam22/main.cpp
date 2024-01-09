@@ -94,7 +94,8 @@ class ComplexWind: public CWind{
 		case ID_FEN40005:
 			menu_hnd= ::GetMenu(m_hWnd);
 			::SetMenu(m_hWnd,0);
-			::SetWindowLongPtr(m_hWnd,GWL_STYLE,WS_VISIBLE | WS_POPUP | WS_EX_TOPMOST); //tc mn topmost w hya style msh exStyle
+			::SetWindowLongPtr(m_hWnd,GWL_STYLE,WS_VISIBLE | WS_POPUP);
+			::SetWindowLongPtr(m_hWnd,GWL_EXSTYLE, WS_EX_TOPMOST);
 			::SetWindowPos(m_hWnd,0,0,0,::GetSystemMetrics(SM_CXSCREEN),::GetSystemMetrics(SM_CYSCREEN),SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED); //shlt nomove w nosize
 			break;
 		default: return -1;
@@ -105,7 +106,9 @@ class ComplexWind: public CWind{
 	  switch(wP){
 		case VK_ESCAPE: //escape key
 			//CWind::SetStyle(CWind::DEF_STYLE); //msh mfrod a3ml kda
-			::SetMenu(m_hWnd,menu_hnd);break;
+			if (menu_hnd != 0)
+				::SetMenu(m_hWnd,menu_hnd);
+			break;
 		case VK_DELETE :
 			::InvalidateRect(hWnd, NULL, TRUE);break; //redraw since it's not persistance so it will erase
 		case 'W':

@@ -89,7 +89,7 @@ protected:
 	  void SetPenColor(COLORREF pcolor){pen_color = pcolor;}
 	  void SetPenWidth(int pwidth){pen_width = pwidth;}
 
-  CDessineWind(COLORREF Color, const RECT* pR=0):CWind(Color,_T(""),pR,WS_VISIBLE | WS_POPUP | WS_EX_TOPMOST,0,0),pen_color(0xFFFFFF),pen_width(3){}
+  CDessineWind(COLORREF Color, const RECT* pR=0):CWind(Color,_T(""),pR,WS_VISIBLE | WS_POPUP, WS_EX_TOPMOST,0,0),pen_color(0xFFFFFF),pen_width(3){}
 };
 
 class CWinNoBorder: public CWind
@@ -609,7 +609,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	//return test3E();
 	//return test3F();
 
-	return test3I();
+	//return test3I();
 	//return test3J();
 	//return test3K();
 	//return test3G();

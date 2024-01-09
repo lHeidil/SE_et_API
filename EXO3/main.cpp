@@ -605,11 +605,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	//return test3A();
 	//return test3B();
 	//return test3C();
-	return test3D();
+	//return test3D();
 	//return test3E();
 	//return test3F();
 
-	//return test3I();
+	return test3I();
 	//return test3J();
 	//return test3K();
 	//return test3G();

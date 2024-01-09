@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Exam22", "Exam22\Exam22.vcp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UntangleGame", "UntangleGame\UntangleGame.vcproj", "{E778B45D-1F83-4CA5-A2BF-26CEB6947596}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Exam15", "Exam15\Exam15.vcproj", "{7A4EE7D7-A532-4CD5-A4AA-0B8560F179B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -49,6 +51,10 @@ Global
 		{E778B45D-1F83-4CA5-A2BF-26CEB6947596}.Debug|Win32.Build.0 = Debug|Win32
 		{E778B45D-1F83-4CA5-A2BF-26CEB6947596}.Release|Win32.ActiveCfg = Release|Win32
 		{E778B45D-1F83-4CA5-A2BF-26CEB6947596}.Release|Win32.Build.0 = Release|Win32
+		{7A4EE7D7-A532-4CD5-A4AA-0B8560F179B3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7A4EE7D7-A532-4CD5-A4AA-0B8560F179B3}.Debug|Win32.Build.0 = Debug|Win32
+		{7A4EE7D7-A532-4CD5-A4AA-0B8560F179B3}.Release|Win32.ActiveCfg = Release|Win32
+		{7A4EE7D7-A532-4CD5-A4AA-0B8560F179B3}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

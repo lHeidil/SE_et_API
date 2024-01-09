@@ -176,18 +176,11 @@ _declspec(selectany) const RECT CodeWind::rpos={0,0,240,200};
 _declspec(selectany) const COLORREF CodeWind::bkgndColors[3]={0x00FFFF,0x0000FF,0x00FF00};
 
 /****************************** classe FormWind *******************************/ 
-class CWinNoBorder: public CWind
-{
-protected:
-  
-public:
-  CWinNoBorder(COLORREF Color, const RECT* pR=0):CWind(Color,_T(""),pR,WS_VISIBLE | WS_POPUP){}
-};
 
 class FormWind: public CWind
 {
-	virtual LRESULT WmLButtonDown(HWND hWnd, WPARAM wP, LPARAM lP)
-	{ return ::SendMessage(hWnd,WM_NCLBUTTONDOWN,HTCAPTION,0);  }
+	/*virtual LRESULT WmLButtonDown(HWND hWnd, WPARAM wP, LPARAM lP)
+	{ return ::SendMessage(hWnd,WM_NCLBUTTONDOWN,HTCAPTION,0);  }*/
 	virtual LRESULT WmRButtonDown(HWND hWnd, WPARAM wP, LPARAM lP)
 	{ return ::SendMessage(hWnd,WM_CLOSE,0,0);    }
 public:
@@ -207,7 +200,18 @@ public:
 		::SetWindowRgn(m_hWnd,hRgn,true);
 	}
 
-	FormWind(COLORREF Color, const RECT* pR=0):CWind(Color,_T(""),pR,WS_VISIBLE | WS_POPUP | WS_EX_TOPMOST){}
+	FormWind(COLORREF Color, const RECT* pR=0,INT form=0):CWind(Color,_T(""),pR,WS_VISIBLE | WS_POPUP, WS_EX_TOPMOST)
+	{
+		switch (form){
+		case 1:
+			{SetRound(pR->left,pR->top,pR->right,pR->bottom);break;}
+		case 2:{
+			CONST POINT p[3]= {{0, pR->bottom},{pR->right, pR->bottom},{(pR->right)/2, 0}};
+			SetTriangle(p);break;}
+		case 3:
+			{SetRoundRect(0,0,pR->right,pR->bottom,50,50);break;}
+		}
+	}
 };
 /******************************** tests unitaires ***************************/
 
@@ -218,19 +222,18 @@ int test1() // Exo1
 }
 int test2() // Exo2
 {
-  RECT r1={0,0,200,200}, r2={250,0,200,200}, r3={500,0,200,200};
-  FormWind w1(0xA0000FF,&r1);
-  FormWind w2(0x00FF00,&r2);
-  FormWind w3(0xA00FFFF,&r3);
-  w1.SetRound(0,0,200,200);
-  CONST POINT p[3]= {{0, 200},{200, 200},{100, 0}};
-  w2.SetTriangle(p);
-  w3.SetRoundRect(0,0,200,200,50,50);
+  RECT r1={0,0,200,200}, r2={250,0,200,200}, r3={500,0,200,200}, r4={750,0,200,200};
+  FormWind ellipse(0xA0000FF,&r1,1);
+  FormWind triangle(0x00FF00,&r2,2);
+  FormWind roundRectangle(0xA00FFFF,&r3,3);
+  FormWind rectangle(0xAA2288,&r4);
+  
   return CWind::MsgLoop();
 }
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-	test1();
+	//test1();
+	test2();
 	return 0;
 }

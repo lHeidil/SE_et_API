@@ -5,6 +5,9 @@
 
 /****************************** classe CodeWind *******************************/ 
 
+static const LONG MAX_WIND=5;
+static HANDLE hsem;
+
 class CodeWind: public CWind{
 	TCHAR code[5];
 	int i;
@@ -183,7 +186,7 @@ class FormWind: public CWind
 	{ return ::SendMessage(hWnd,WM_NCLBUTTONDOWN,HTCAPTION,0);  }*/
 	virtual LRESULT WmRButtonDown(HWND hWnd, WPARAM wP, LPARAM lP)
 	{ return ::SendMessage(hWnd,WM_CLOSE,0,0);    }
-public:
+
 	void SetRound(int x,int y,int w,int h)
 	{
 		HRGN hRgn = ::CreateEllipticRgn(x,y,w,h);
@@ -199,10 +202,23 @@ public:
 		HRGN hRgn = ::CreateRoundRectRgn(x,y,w,h,h_ellipse,w_ellipse);
 		::SetWindowRgn(m_hWnd,hRgn,true);
 	}
-
+public:
+	static COLORREF RandColor()
+	{
+		static COLORREF last_clr=0x0000FF;
+		LARGE_INTEGER t; ::QueryPerformanceCounter(&t);
+		return last_clr=(~last_clr^(t.LowPart*t.LowPart*t.LowPart))&0xFFFFFF;
+	}
+	static int RandNumber(int limit)
+	{
+		LARGE_INTEGER t;
+		::QueryPerformanceCounter(&t);
+		//modulus to get a value between 0 and the limit
+		return static_cast<int>((t.QuadPart % limit));
+	}
 	FormWind(COLORREF Color, const RECT* pR=0,INT form=0):CWind(Color,_T(""),pR,WS_VISIBLE | WS_POPUP, WS_EX_TOPMOST)
 	{
-		switch (form){
+		switch (form){//case 0 is normal rectangle
 		case 1:
 			{SetRound(pR->left,pR->top,pR->right,pR->bottom);break;}
 		case 2:{
@@ -210,6 +226,27 @@ public:
 			SetTriangle(p);break;}
 		case 3:
 			{SetRoundRect(0,0,pR->right,pR->bottom,50,50);break;}
+		}
+	}
+	static  DWORD WINAPI ThProc(LPVOID arg) 
+	{	
+		((FormWind*)arg)->SemaTh(); return 0;
+	}
+	void SemaTh()
+	{
+		if(::WaitForSingleObject(hsem,INFINITE)==WAIT_OBJECT_0)
+		{
+			::CloseHandle(CreateThread(0,0,ThProc,this,true,0));
+
+			int rndmX = RandNumber(600);
+			int rndmY = RandNumber(600);
+			RECT r1={rndmX,rndmY,rndmX+200,rndmY+200};
+
+			FormWind shape(RandColor(),&r1,RandNumber(3)); //local
+			shape.MsgLoop();
+			::ReleaseSemaphore(hsem,1,0);
+			//::Sleep(1000);
+			
 		}
 	}
 };
@@ -220,17 +257,17 @@ int test1() // Exo1
   CodeWind w1(_T("123456789"));
   return CWind::MsgLoop();
 }
+
+
 int test2() // Exo2
 {
-  RECT r1={0,0,200,200}, r2={250,0,200,200}, r3={500,0,200,200}, r4={750,0,200,200};
-  FormWind ellipse(0xA0000FF,&r1,1);
-  FormWind triangle(0x00FF00,&r2,2);
-  FormWind roundRectangle(0xA00FFFF,&r3,3);
-  FormWind rectangle(0xAA2288,&r4);
-  
-  return CWind::MsgLoop();
+  	hsem = ::CreateSemaphore(0,MAX_WIND,MAX_WIND,_T("Exam15-Semaphore"));
+	::CloseHandle(::CreateThread(0,0,FormWind::ThProc,0,0,0));
+	::MessageBox(0,_T("Quitter"), _T("Exam15"),MB_OK);
+	::CloseHandle(hsem);
+	return CWind::MsgLoop();
 }
-
+	
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
 	//test1();

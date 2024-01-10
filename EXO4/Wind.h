@@ -4,7 +4,7 @@
 #include <windows.h>
 #include <tchar.h>
 
-#define USE_CONSOLE //mnst3mlsh l task manager wla q2fl l console bl3fya gher nader gdn
+//#define USE_CONSOLE //mnst3mlsh l task manager wla a2fl l console bl3fya
 #ifdef USE_CONSOLE
 #include <stdio.h>
 // this class allow you to use printf in any Windows GUI application

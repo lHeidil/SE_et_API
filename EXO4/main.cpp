@@ -5,19 +5,19 @@
 
 class CWorkWind: public CWind
 {
-	static const RECT rpos;
+  static const RECT rpos;
   static const LONG SEM_Places=3;
-  static  DWORD WINAPI WorkAsyncTh(LPVOID arg) //methode satic n'a pas de this
+  static  DWORD WINAPI WorkAsyncTh(LPVOID arg) //methode static n'a pas de this
   {
     ((CWorkWind*)arg)->SlowWork(0); //type cast au classe car il etait void
     return 0;
   }
 
-  static  DWORD WINAPI WorkSyncMutexTh(LPVOID arg) //la deuxieme attend n'est pas un time_out mais le 3eme car il a attendu 10 seconds donc il l'a abondonner
+  static  DWORD WINAPI WorkSyncMutexTh(LPVOID arg) //la deuxieme attente n'est pas un time-out mais la 3eme car il a attendu 10 seconds donc il l'a abondonner
   {((CWorkWind*)arg)->WorkSyncMutex(); return 0;}
   void WorkSyncMutex()
   {
-    if(::WaitForSingleObject(hmtx,10000)==WAIT_OBJECT_0){ //10 secs
+    if(::WaitForSingleObject(hmtx,10000)==WAIT_OBJECT_0){ //i'm waiting for 10 secs only then i will go if i didn't enter
       SlowWork(1); ::ReleaseMutex(hmtx);
     } //si WAIT_TIMEOUT on fait rien // les 2 seuls reponse qu'on il n'y a pas de problem du code
   }
@@ -26,8 +26,8 @@ class CWorkWind: public CWind
   {((CWorkWind*)arg)->WorkSyncSC(); return 0;}
   void WorkSyncSC()
   {
-#if 1 //comme le mutex mais attend infinie pas xx seconds
-    //version 1 entre obligatoir et attend possible(inifinie)
+#if 1 //comme le mutex mais on peut attendre infiniment pas xx seconds
+    //version 1 entre obligatoire et attente possible(inifinie)
     EnterCriticalSection(&sect);
     // dans la section critique
     SlowWork(2);
@@ -45,8 +45,7 @@ class CWorkWind: public CWind
 
   static  DWORD WINAPI WorkSyncSemaTh(LPVOID arg) 
   {
-    ((CWorkWind*)arg)->WorkSyncSema(); 
-    return 0;
+    ((CWorkWind*)arg)->WorkSyncSema(); return 0;
   }
   void WorkSyncSema()
   {
@@ -63,7 +62,7 @@ class CWorkWind: public CWind
     
   void WorkSyncEvent()
   {
-    LONG idx=::InterlockedIncrement(&incTh) -1;
+    LONG idx=::InterlockedIncrement(&incTh) -1; //The InterlockedIncrement routine increments a caller-supplied variable as an atomic operation.
     if(::WaitForSingleObject(hevent,INFINITE)==WAIT_OBJECT_0){ 
       SlowWork(idx);
     } 
@@ -76,29 +75,31 @@ class CWorkWind: public CWind
 		case ID_FICHIER_QUITTER:
 			::SendMessage(hWnd, WM_CLOSE,0,0);
 			break;
-    case ID_FICHIER_WORKSYNC:
-      SlowWork(0); //bloquant dans le thread principale n'est pas bon
-      break;
-    case ID_FICHIER_WORKASYNC: 
-      ::CloseHandle(::CreateThread(0,0,WorkAsyncTh,this,0,0)); //pas besoin de garder le handle et le thread n'est pas mort
-      break;
-    case ID_FICHIER_WORKSYNCMUTEX:
-      ::CloseHandle(::CreateThread(0,0,WorkSyncMutexTh,this,0,0));
-      break;
-    case ID_FICHIER_WORKSYNCSECTIONCRITIQUE:
-      ::CloseHandle(::CreateThread(0,0,WorkSyncSCTh,this,0,0));
-      break;
-    case ID_FICHIER_WORKSYNCSEMAPHORE:
-      ::CloseHandle(::CreateThread(0,0,WorkSyncSemaTh,this,0,0));
-      break;
-    case ID_FICHIER_WORKSYNCEVENT:
-      incTh=0;
-      for(int i=0;i<4;i++)
-        ::CloseHandle(::CreateThread(0,0,WorkSyncEventTh,this,0,0));    
-      break;
-    case ID_FICHIER_WORKSYNCSTART: 
-      ::PulseEvent(hevent);
-      break;
+		case ID_FICHIER_WORKSYNC:
+		  SlowWork(0); //bloquant dans le thread principale n'est pas bon
+		  break;
+		case ID_FICHIER_WORKASYNC: 
+		  ::CloseHandle(::CreateThread(0,0,WorkAsyncTh,this,0,0)); //pas besoin de garder le handle et le thread n'est pas mort
+		  //Closing the handle does not terminate the thread; it just releases the system resources associated with the thread handle.
+		  //The thread continues running independently.
+		  break;
+		case ID_FICHIER_WORKSYNCMUTEX:
+		  ::CloseHandle(::CreateThread(0,0,WorkSyncMutexTh,this,0,0));
+		  break;
+		case ID_FICHIER_WORKSYNCSECTIONCRITIQUE:
+		  ::CloseHandle(::CreateThread(0,0,WorkSyncSCTh,this,0,0));
+		  break;
+		case ID_FICHIER_WORKSYNCSEMAPHORE:
+		  ::CloseHandle(::CreateThread(0,0,WorkSyncSemaTh,this,0,0));
+		  break;
+		case ID_FICHIER_WORKSYNCEVENT:
+		  incTh=0;
+		  for(int i=0;i<4;i++)
+			::CloseHandle(::CreateThread(0,0,WorkSyncEventTh,this,0,0));    
+		  break;
+		case ID_FICHIER_WORKSYNCSTART: 
+		  ::PulseEvent(hevent); //SetEvent let it draw whenever threads are created //ResetEvent just waits
+		  break;
 
 		default: return -1;
 		}
@@ -107,7 +108,7 @@ class CWorkWind: public CWind
   HANDLE hmtx,hsem,hevent; //mtx comme mutex,semaphore
   CRITICAL_SECTION sect;
   LONG incTh;
-public :
+
   COLORREF RandColor()
   {
     static COLORREF last_clr=0x0000FF;
@@ -125,22 +126,23 @@ public :
     ::DeletePen(hpen);
     ::ReleaseDC(m_hWnd,dc);
   }
+public :
 	CWorkWind(LPCTSTR name = _T("Working Window")):
 		CWind(name,&rpos, WS_POPUP| WS_CAPTION |WS_VISIBLE, 0,0,IDR_MENU1)
 	{
-    hmtx=::CreateMutex(0,false,0);//posseder par le thread on est ici thread principale donc on ne le donne a person 0
-      //anonyme car on ne parle pas entre 2 processus
-    ::InitializeCriticalSection(&sect);
-    hsem=::CreateSemaphore(0,SEM_Places,SEM_Places,0);//nombre max des places qu'il peut les modeliser , il decremente
-	  hevent=::CreateEvent(0,true,false,0);
-  }
+		hmtx=::CreateMutex(0,false,0);//posseder par le thread, on est ici thread principale donc on ne le donne a person false
+		  //anonyme car on ne parle pas entre 2 processus
+		::InitializeCriticalSection(&sect);
+		hsem=::CreateSemaphore(0,SEM_Places,SEM_Places,0);//nombre max des places qu'il peut les modeliser , il decremente
+		hevent=::CreateEvent(0,true,false,0);
+	}
 
 	~CWorkWind()
 	{
-    ::CloseHandle(hevent);
-    ::CloseHandle(hmtx);
-    ::CloseHandle(hsem); //release libere la place mais il reste a fonctionner!
-    ::DeleteCriticalSection(&sect);
+		::CloseHandle(hevent);
+		::CloseHandle(hmtx);
+		::CloseHandle(hsem); //release libere la place mais il reste a fonctionner!
+		::DeleteCriticalSection(&sect);
 	}
 };
 _declspec(selectany) const RECT CWorkWind::rpos={0, 0, 500, 500};
@@ -160,11 +162,11 @@ int unique()
     //::MessageBox(0,_T("Erreur handle NULL"), _T("Exo4"),MB_OK);
     return 0;
   }
-  if(::GetLastError()==ERROR_ALREADY_EXISTS)
+  if(::GetLastError()==ERROR_ALREADY_EXISTS) //quand c'est  la 2eme processus ou plus apres la premiere
   {
     //::MessageBox(0,_T("Je ne suis pas seul"), _T("Exo4"),MB_OK);
   }
-  else //quand c'est  la 2eme processus ou plus apres la premiere
+  else 
   {
     //::MessageBox(0,_T("Je suis seul actuellement"), _T("Exo4"),MB_OK);
     test4A();
